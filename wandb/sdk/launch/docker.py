@@ -135,7 +135,7 @@ RUN /env/bin/conda-unpack
 """
 
 USER_CREATE_TEMPLATE = """
-RUN useradd \
+RUN id -u {user} &>/dev/null || useradd \
     --create-home \
     --no-log-init \
     --shell /bin/bash \
