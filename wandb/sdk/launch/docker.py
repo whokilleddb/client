@@ -227,10 +227,12 @@ def get_requirements_section(launch_project: LaunchProject) -> str:
             "Docker BuildX is not installed, for faster builds upgrade docker: https://github.com/docker/buildx#installing"
         )
         prefix = "RUN WANDB_DISABLE_CACHE=true"
-
+    print("Launch project deps type", launch_project.deps_type)
     if launch_project.deps_type == "pip":
-        requirements_files = ["src/requirements.txt"]
-        pip_install_line = "pip install -r requirements.txt"
+        requirements_files = []
+        if os.path.exists(os.path.join(launch_project.project_dir, "requirements.txt")):
+            requirements_files += ["src/requirements.txt"]
+            pip_install_line = "pip install -r requirements.txt"
         if os.path.exists(
             os.path.join(launch_project.project_dir, "requirements.frozen.txt")
         ):
@@ -240,7 +242,6 @@ def get_requirements_section(launch_project: LaunchProject) -> str:
                 _parse_existing_requirements(launch_project)
                 + "python _wandb_bootstrap.py"
             )
-
         if buildx_installed:
             prefix = "RUN --mount=type=cache,mode=0777,target=/root/.cache/pip"
 
@@ -326,6 +327,7 @@ def generate_dockerfile(
     entrypoint_section = get_entrypoint_setup(
         launch_project, entry_cmd, workdir, runner_type
     )
+    print('python base setip')
 
     dockerfile_contents = DOCKERFILE_TEMPLATE.format(
         py_build_image=python_build_image,
